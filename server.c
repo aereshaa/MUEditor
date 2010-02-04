@@ -25,13 +25,20 @@ void server_get_connections(int serv_socket);
 #endif
 void server_cleanup(void);
 void server_handle_clients(void* client_index);
-
+#ifdef _WIN32
 SOCKET * client_sockets;
+#else
+int * client_sockets;
+#endif
 struct sockaddr * client_addrs;
 
 int main(int argc, char ** argv)
 {
+#ifdef _WIN32
 		SOCKET serv_socket;
+#else
+		int serv_socket;
+#endif
 		if (server_init()) {
 			if (server_create()) {
 				printf("Server is running.\n");
@@ -93,11 +100,15 @@ void server_get_connections(int serv_socket)
 	#if !defined(_WIN32)
 		pthread_t threadid;
 	#endif
+	#ifdef _WIN32
 		if (client_sockets = calloc(MAX_CLIENTS, sizeof(SOCKET))) {
+	#else
+		if (client_sockets = calloc(MAX_CLIENTS, sizeof(int))) {
+	#endif
 	#ifdef _WIN32
 			memset(client_sockets, INVALID_SOCKET, sizeof(SOCKET) * MAX_CLIENTS);
 	#else
-			memset(client_sockets, -1, sizeof(SOCKET) * MAX_CLIENTS);
+			memset(client_sockets, -1, sizeof(int) * MAX_CLIENTS);
 	#endif
 			if (client_addrs = calloc(MAX_CLIENTS, sizeof(struct sockaddr))) {
 				while (true) {
